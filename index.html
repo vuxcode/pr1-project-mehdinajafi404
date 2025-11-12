@@ -8,20 +8,31 @@
 <!--Body is where we hold all the visible contents-->
 <body>
 
-    <!--Giving the canvas a name and size-->
-    <canvas id="MazeCanvas" width="600" height="400">
-        <script>   
+<!--Giving the canvas a name and size-->
+<canvas id="MazeCanvas" width="600" height="400"></canvas>
+    <script>  
+        //Creating variables 
         var canvas = document.getElementById('MazeCanvas');
         var ctx = canvas.getContext('2d');
-    // Draw a simple rectangle to test
-    // ctx or context is a variable that stores an object
-    ctx.fillStyle = 'yellow'; // color
-    ctx.fillRect(0, 0, 40, 40); // x, y, width, height. top-left corner
-        
-        console.log("Test");
-        </script>
 
-    </canvas>
+        var tileSize = 40; //size of the square in pixels
+        var cols = Math.floor(canvas.width / tileSize); //Counts full tiles across horizontally
+        var rows = Math.floor(canvas.height / tileSize); // ... vertically
+
+    // Draw the grid
+    //creating a for-loop to go through each row to help draw the maze grid
+        for (var y = 0; y < rows; y++) {
+        for (var x = 0; x < cols; x++) {
+        ctx.fillStyle = '#111';  // empty space color
+        ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+    
+        ctx.strokeStyle = '#333'; // grid lines
+        ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
+  }
+}
+
+        console.log("Test");
+    </script>
 
 </body>
 
