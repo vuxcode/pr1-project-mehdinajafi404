@@ -8,6 +8,11 @@ For example:
 
   - *Started to test how canvas works and  what it does.*
 
-- 21-11-2025 18:40 Worked for 1.5 hour.
+- 12-11-2025 18:40 Worked for 1.5 hour.
 
   - *Made the grid but i will make some changes on it next time.*
+
+- 14-11-2025 15:30 Worked for 3 hour.
+
+  - *Moved the grid to the center and created the player. the player can't move right now.*
+
