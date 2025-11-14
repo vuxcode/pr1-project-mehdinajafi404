@@ -1,15 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-<meta name="color-scheme" content="dark">
+
 <head>
-<title>Maze Game</title>
+    <title>Maze Game</title>
+    
+    <!--I'm using CSS here to add margins and colours. I find it easier this way-->
+    <style>
+        body {
+        text-align: center;
+        background: #111;
+        color: white;
+        margin: 0;
+        padding: 0;
+        }
+
+        canvas {
+        margin-top: 20px;
+        border: 2px solid #333;
+        display: block;
+        margin: 20px auto;
+        }
+
+        #controls {
+        margin-top: 15px;
+        }
+    </style>
+
 </head>
- 
+
 <!--Body is where we hold all the visible contents-->
 <body>
 
 <!--Giving the canvas a name and size-->
-<canvas id="MazeCanvas" width="600" height="400"></canvas>
+<canvas id="MazeCanvas" width="680" height="440"></canvas>
+
+<!--Creating a container for the buttons so that I can customize later-->
+  <div id="controls">
+    <button id="startBtn">Start</button>
+    <button id="restartBtn">Restart</button>
+  </div>
+
     <script>  
         //Creating variables 
         var canvas = document.getElementById('MazeCanvas');
@@ -28,8 +58,19 @@
     
         ctx.strokeStyle = '#333'; // grid lines
         ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
-  }
-}
+        }
+        }
+
+        // Creating the player
+        // I want the player to start at top left corner
+        // x is horizontal player position and y is vertical player position
+        var player = { x: 0, y: 0, color: 'yellow' };
+        ctx.fillStyle = player.color;
+        // Here we're multiplying players position with the tilesize 
+        // to convert from tile units to pixels
+        // We use the same value (tileSize) for width and height
+        // because each tile in the maze is a square
+        ctx.fillRect(player.x * tileSize, player.y * tileSize, tileSize, tileSize);
 
         console.log("Test");
     </script>
