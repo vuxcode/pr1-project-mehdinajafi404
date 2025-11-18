@@ -16,3 +16,8 @@ For example:
 
   - *Moved the grid to the center and created the player. the player can't move right now.*
 
+- 18-11-2025 17:30 Worked for 3 hour.
+
+  - *The player can move now using the arrow keys.*
+
+
