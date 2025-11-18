@@ -41,38 +41,76 @@
   </div>
 
     <script>  
-        //Creating variables 
+       // Creating variables for canvas
         var canvas = document.getElementById('MazeCanvas');
         var ctx = canvas.getContext('2d');
 
+        // The Grid
         var tileSize = 40; //size of the square in pixels
         var cols = Math.floor(canvas.width / tileSize); //Counts full tiles across horizontally
         var rows = Math.floor(canvas.height / tileSize); // ... vertically
-
-    // Draw the grid
-    //creating a for-loop to go through each row to help draw the maze grid
-        for (var y = 0; y < rows; y++) {
-        for (var x = 0; x < cols; x++) {
-        ctx.fillStyle = '#111';  // empty space color
-        ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
-    
-        ctx.strokeStyle = '#333'; // grid lines
-        ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
-        }
-        }
 
         // Creating the player
         // I want the player to start at top left corner
         // x is horizontal player position and y is vertical player position
         var player = { x: 0, y: 0, color: 'yellow' };
-        ctx.fillStyle = player.color;
-        // Here we're multiplying players position with the tilesize 
-        // to convert from tile units to pixels
-        // We use the same value (tileSize) for width and height
-        // because each tile in the maze is a square
-        ctx.fillRect(player.x * tileSize, player.y * tileSize, tileSize, tileSize);
 
-        console.log("Test");
+        // Function to draw grid and player
+        function draw() {
+            // Clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the grid
+            //creating a for-loop to go through each row to help draw the maze grid
+            for (var y = 0; y < rows; y++) {
+                for (var x = 0; x < cols; x++) {
+                    ctx.fillStyle = '#111';
+                    ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+
+                    ctx.strokeStyle = '#333';
+                    ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                }
+            }
+
+            // Draw the player
+            ctx.fillStyle = player.color;
+            // Here we're multiplying players position with the tilesize 
+            // to convert from tile units to pixels
+            // We use the same value (tileSize) for width and height
+            // because each tile in the maze is a square
+            ctx.fillRect(player.x * tileSize, player.y * tileSize, tileSize, tileSize);
+        }
+
+        // Initial draw
+        draw();
+
+        // Function to move player
+        function movePlayer(horizontalMove, verticalMove) {
+            var newCol = player.x + horizontalMove;
+            var newRow = player.y + verticalMove;
+
+            // Keep player inside the grid
+            if (newCol >= 0 && newCol < cols && newRow >= 0 && newRow < rows) {
+                player.x = newCol;
+                player.y = newRow;
+            }
+
+            // Redraw everything
+            //Every time the player moves, the canvas needs to be redrawn. 
+            draw();
+        }
+
+        // Arrow keys 
+        window.addEventListener('keydown', function(e) {
+            switch (e.key) {
+                case "ArrowUp": movePlayer(0, -1); break;
+                case "ArrowDown": movePlayer(0, 1); break;
+                case "ArrowLeft": movePlayer(-1, 0); break;
+                case "ArrowRight": movePlayer(1, 0); break;
+            }
+        });
+
+        console.log("The player can move now. Yaay!");
     </script>
 
 </body>
