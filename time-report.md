@@ -20,4 +20,10 @@ For example:
 
   - *The player can move now using the arrow keys.*
 
+- 19-11-2025 17:00 Worked for 1.5 hour.
+
+  - *Creating the goal and the player can move and interract with it.*
+
+
+
 
