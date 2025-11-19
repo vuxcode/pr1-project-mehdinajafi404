@@ -41,6 +41,7 @@
   </div>
 
     <script>  
+       
        // Creating variables for canvas
         var canvas = document.getElementById('MazeCanvas');
         var ctx = canvas.getContext('2d');
@@ -55,32 +56,45 @@
         // x is horizontal player position and y is vertical player position
         var player = { x: 0, y: 0, color: 'yellow' };
 
+        // Create an empty maze (rows × cols)
+        var maze = [];
+
+        // Creating the goal, buttom right corner
+        var goal = {
+        x: cols - 1,
+        y: rows - 1
+        };
+
         // Function to draw grid and player
         function draw() {
-            // Clear the canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                // Clear the canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw the grid
-            //creating a for-loop to go through each row to help draw the maze grid
-            for (var y = 0; y < rows; y++) {
-                for (var x = 0; x < cols; x++) {
-                    ctx.fillStyle = '#111';
-                    ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                // Draw the grid
+                //creating a for-loop to go through each row to help draw the maze grid
+                for (var y = 0; y < rows; y++) {
+                    for (var x = 0; x < cols; x++) {
+                        ctx.fillStyle = '#111';
+                        ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
 
-                    ctx.strokeStyle = '#333';
-                    ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                        ctx.strokeStyle = '#333';
+                        ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                    }
                 }
-            }
+                
+                // Coloring and filling the goal.
+                ctx.fillStyle = 'white';
+                ctx.fillRect(goal.x * tileSize, goal.y * tileSize, tileSize, tileSize);
 
-            // Draw the player
-            ctx.fillStyle = player.color;
-            // Here we're multiplying players position with the tilesize 
-            // to convert from tile units to pixels
-            // We use the same value (tileSize) for width and height
-            // because each tile in the maze is a square
-            ctx.fillRect(player.x * tileSize, player.y * tileSize, tileSize, tileSize);
+                // Draw the player
+                ctx.fillStyle = player.color;
+                // Here we're multiplying players position with the tilesize 
+                // to convert from tile units to pixels
+                // We use the same value (tileSize) for width and height
+                // because each tile in the maze is a square
+                ctx.fillRect(player.x * tileSize, player.y * tileSize, tileSize, tileSize);
         }
-
+        
         // Initial draw
         draw();
 
@@ -95,10 +109,23 @@
                 player.y = newRow;
             }
 
+            // check if the player won
+            checkWin();
+
             // Redraw everything
             //Every time the player moves, the canvas needs to be redrawn. 
             draw();
         }
+
+        // Check if player reaches goal
+        function checkWin() {
+        // If player is in the same column, row as the goal.
+        // Then we get the allert.
+        if (player.x === goal.x && player.y === goal.y) {
+        alert("Yaaay! You reached the goal!");
+        }
+        }
+
 
         // Arrow keys 
         window.addEventListener('keydown', function(e) {
