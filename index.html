@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Maze Game</title>
+    <title>Maze</title>
     
     <!--I'm using CSS here to add margins and colours. I find it easier this way-->
     <style>
@@ -16,13 +16,13 @@
 
         canvas {
         margin-top: 20px;
-        border: 2px solid #333;
+        border: 2px solid white;
         display: block;
         margin: 20px auto;
         }
 
         #controls {
-        margin-top: 15px;
+        margin-top: 15px;   /* Space above button */
         }
     </style>
 
@@ -40,30 +40,74 @@
     <button id="restartBtn">Restart</button>
   </div>
 
-    <script>  
+    <script>
        
-       // Creating variables for canvas
+        // Creating variables for canvas
         var canvas = document.getElementById('MazeCanvas');
+        // The context or ctx is what gives us the ability to draw in 2d on the canvas.
         var ctx = canvas.getContext('2d');
 
-        // The Grid
+        // Creating the tiles and it's size and amount.
         var tileSize = 40; //size of the square in pixels
         var cols = Math.floor(canvas.width / tileSize); //Counts full tiles across horizontally
         var rows = Math.floor(canvas.height / tileSize); // ... vertically
 
         // Creating the player
-        // I want the player to start at top left corner
+        // Position: Top left corner
         // x is horizontal player position and y is vertical player position
         var player = { x: 0, y: 0, color: 'yellow' };
 
-        // Create an empty maze (rows × cols)
-        var maze = [];
-
-        // Creating the goal, buttom right corner
+        // Creating the goal, buttom right corner.
+        // This is the players goal to reach.
         var goal = {
         x: cols - 1,
         y: rows - 1
         };
+
+        // Creating a Function to generate a maze using the alghorithm. 
+        // DFS stands for Depth-First Search
+        function generateMazeDFS(){
+        // First I'm filling the maze completely with walls (1)
+        maze = []; // Start with an empty array to hold the maze
+        for(var y=0; y<rows; y++){ // Loops through each row
+        maze[y]=[]; // Create a new array for this row
+        for(var x=0;x<cols;x++) // Loop through each column
+        maze[y][x]=1; // Fills this cell with 1 or walls
+        }
+
+        // This is the main Boss, the core alghorithm that actually creates a maze. 
+        // creating a function to carve paths. 
+        function carve(x,y){
+        maze[y][x]=0; // mark current cell as empty/path. 
+        // creating an array that stores all the possible directions- 
+        // -the algorithm can move from the current cell.
+        // for example [1, 0] means go 1 cell right, 0 cells down. move right
+        // Possible directions to move: up, right, down, left
+        var dirs=[[0,-1],[1,0],[0,1],[-1,0]];
+        
+        // Shuffle directions to make maze random
+        for(var i=dirs.length-1;i>0;i--){
+            var j=Math.floor(Math.random()*(i+1));
+            [dirs[i],dirs[j]]=[dirs[j],dirs[i]];
+            }
+            
+        // Try moving in each direction
+        for(var i=0;i<dirs.length;i++){
+            var nx=x+dirs[i][0]*2; // Move 2 cells to skip a wall
+            var ny=y+dirs[i][1]*2;
+            
+        // Check if new position is inside maze bounds and not yet carved
+        if(nx>=0 && nx<cols && ny>=0 && ny<rows && maze[ny][nx]===1){
+            maze[y+dirs[i][1]][x+dirs[i][0]]=0; // Remove wall between
+            carve(nx,ny); // Recursive call to carve next cell
+                }
+            }
+        }   
+
+        carve(0,0); // Start carving from top-left
+        maze[0][0]=0; // Make sure that starting point is empty
+        maze[rows-1][cols-1]=0; // Make sure that the goal is empty
+        }
 
         // Function to draw grid and player
         function draw() {
@@ -74,7 +118,7 @@
                 //creating a for-loop to go through each row to help draw the maze grid
                 for (var y = 0; y < rows; y++) {
                     for (var x = 0; x < cols; x++) {
-                        ctx.fillStyle = '#111';
+                        ctx.fillStyle = maze[y][x] === 1 ? '#555' : '#111';
                         ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
 
                         ctx.strokeStyle = '#333';
@@ -94,9 +138,10 @@
                 // because each tile in the maze is a square
                 ctx.fillRect(player.x * tileSize, player.y * tileSize, tileSize, tileSize);
         }
-        
-        // Initial draw
-        draw();
+
+        var maze = [];
+        generateMazeDFS(); // fill maze with walls and paths
+        draw();            // now draw the first maze
 
         // Function to move player
         function movePlayer(horizontalMove, verticalMove) {
@@ -104,13 +149,11 @@
             var newRow = player.y + verticalMove;
 
             // Keep player inside the grid
-            if (newCol >= 0 && newCol < cols && newRow >= 0 && newRow < rows) {
-                player.x = newCol;
-                player.y = newRow;
+            if (newCol >= 0 && newCol < cols && newRow >= 0 && newRow < rows && maze[newRow][newCol] === 0) {
+            player.x = newCol;
+            player.y = newRow;
+            checkWin(); // check if the player won
             }
-
-            // check if the player won
-            checkWin();
 
             // Redraw everything
             //Every time the player moves, the canvas needs to be redrawn. 
@@ -121,11 +164,13 @@
         function checkWin() {
         // If player is in the same column, row as the goal.
         // Then we get the allert.
-        if (player.x === goal.x && player.y === goal.y) {
-        alert("Yaaay! You reached the goal!");
+          if(player.x === goal.x && player.y === goal.y){
+        alert("🎉 You reached the goal!");
+        player.x = 0; player.y = 0;
+        generateMazeDFS();
+        draw();
         }
         }
-
 
         // Arrow keys 
         window.addEventListener('keydown', function(e) {
@@ -137,7 +182,20 @@
             }
         });
 
-        console.log("The player can move now. Yaay!");
+        //
+        document.getElementById('startBtn').addEventListener('click', function(){
+        player.x=0; player.y=0;
+        generateMazeDFS();
+        draw();
+        });
+        
+        document.getElementById('restartBtn').addEventListener('click', function(){
+        player.x=0; player.y=0;
+        generateMazeDFS();
+        draw();
+        });
+
+        console.log("ts was harder than I thought!");
     </script>
 
 </body>
