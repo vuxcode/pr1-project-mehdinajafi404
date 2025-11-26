@@ -27,6 +27,13 @@ For example:
 - 24-11-2025 13:00 Worked for 4.5 hours.
 
   - *Created the the maze generator and made small changes with make everything run smoothly. There are some issues with buttons but i will fix them next time.*
+ 
+- 26-11-2025 13:00 Worked for 2 hours.
+
+  - *Removed one button because they both basically did the same thing. Experimented with colors but it didn't turn out like i wanted to*
+  - *Added game title at the top*
+
+
 
 
 
