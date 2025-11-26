@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Maze</title>
+    <title>Yellow</title>
     
     <!--I'm using CSS here to add margins and colours. I find it easier this way-->
     <style>
@@ -14,9 +14,15 @@
         padding: 0;
         }
 
+        #gameTitle {
+        text-align: center;
+        margin-bottom: 10px;
+        font-size: 28px;
+        font-weight: bold;
+    }
         canvas {
         margin-top: 20px;
-        border: 2px solid white;
+        border: 2px solid #3d1f5b;
         display: block;
         margin: 20px auto;
         }
@@ -24,6 +30,14 @@
         #controls {
         margin-top: 15px;   /* Space above button */
         }
+
+        #resetBtn {
+        padding: 10px 20px;
+        font-size: 16px;
+        font-weight: bold;
+        border: 2px solid #3d1f5b;
+        }
+
     </style>
 
 </head>
@@ -31,13 +45,15 @@
 <!--Body is where we hold all the visible contents-->
 <body>
 
+<h1 id="gameTitle">Yellow vs. The Maze</h1>
+
 <!--Giving the canvas a name and size-->
 <canvas id="MazeCanvas" width="680" height="440"></canvas>
 
 <!--Creating a container for the buttons so that I can customize later-->
   <div id="controls">
-    <button id="startBtn">Start</button>
-    <button id="restartBtn">Restart</button>
+    <button id="resetBtn">Reset</button>
+    <!--<button id="restartBtn">Restart</button>-->
   </div>
 
     <script>
@@ -109,6 +125,13 @@
         maze[rows-1][cols-1]=0; // Make sure that the goal is empty
         }
 
+        /*// Generates a random bright-ish color using HSL
+        // This had some bugs that i didn't had the time to fix, but it looks fun.
+        // Everytime the player moves the colors of the walls changes randomly.
+        function randomColor() {
+        return "hsl(" + Math.floor(Math.random() * 360) + ", 70%, 50%)";
+        }*/
+
         // Function to draw grid and player
         function draw() {
                 // Clear the canvas
@@ -118,10 +141,11 @@
                 //creating a for-loop to go through each row to help draw the maze grid
                 for (var y = 0; y < rows; y++) {
                     for (var x = 0; x < cols; x++) {
-                        ctx.fillStyle = maze[y][x] === 1 ? '#555' : '#111';
+                        /*ctx.fillStyle = maze[y][x] === 1 ? randomColor() : '#111';*/
+                        ctx.fillStyle = maze[y][x] === 1 ? '#3d1f5b' : '#111';
                         ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
 
-                        ctx.strokeStyle = '#333';
+                        ctx.strokeStyle = '#111';
                         ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
                     }
                 }
@@ -165,7 +189,7 @@
         // If player is in the same column, row as the goal.
         // Then we get the allert.
           if(player.x === goal.x && player.y === goal.y){
-        alert("🎉 You reached the goal!");
+        alert("🎉 You made it! Press OK for a new random maze.");
         player.x = 0; player.y = 0;
         generateMazeDFS();
         draw();
@@ -183,19 +207,19 @@
         });
 
         //
-        document.getElementById('startBtn').addEventListener('click', function(){
+        document.getElementById('resetBtn').addEventListener('click', function(){
         player.x=0; player.y=0;
         generateMazeDFS();
         draw();
         });
         
-        document.getElementById('restartBtn').addEventListener('click', function(){
+        /*document.getElementById('restartBtn').addEventListener('click', function(){
         player.x=0; player.y=0;
         generateMazeDFS();
         draw();
-        });
+        });*/
 
-        console.log("ts was harder than I thought!");
+        console.log("This was harder than I thought!");
     </script>
 
 </body>
