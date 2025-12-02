@@ -3,7 +3,7 @@
 
 <head>
     <title>Yellow</title>
-    
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <!--I'm using CSS here to add margins and colours. I find it easier this way-->
     <style>
         body {
@@ -21,7 +21,6 @@
         font-weight: bold;
     }
         canvas {
-        margin-top: 20px;
         border: 2px solid #3d1f5b;
         display: block;
         margin: 20px auto;
@@ -63,31 +62,46 @@
         // The context or ctx is what gives us the ability to draw in 2d on the canvas.
         var ctx = canvas.getContext('2d');
 
+        
         // Creating the tiles and it's size and amount.
-        var tileSize = 40; //size of the square in pixels
-        var cols = Math.floor(canvas.width / tileSize); //Counts full tiles across horizontally
-        var rows = Math.floor(canvas.height / tileSize); // ... vertically
+        // The Canvas is 680 pixels wide, if we devide it by 40 it gives us 17 squares.
+        // And the height would be 11 squares. 
+        var squareSize = 40; //size of the square in pixels, if we use 1, 2, 4, 5, 8, 10, 20 but the goal will be blocked.
+        /* With squareSize = 40, the grid is 17×11 (odd), so the DFS reaches the goal. With squareSize = 20, the grid is 34×22 (even), 
+        so DFS skips cells in twos and can’t reach the bottom-right, blocking the goal.*/
+        // Math.floor rounds a number down to the nearest whole number
+        var horizontalSquares = Math.floor(canvas.width / squareSize); //17 squares horizontally
+        var verticalSquares = Math.floor(canvas.height / squareSize); //11 squares vertically
+       
 
         // Creating the player
-        // Position: Top left corner
         // x is horizontal player position and y is vertical player position
+        //Position: Top left corner
         var player = { x: 0, y: 0, color: 'yellow' };
 
         // Creating the goal, buttom right corner.
-        // This is the players goal to reach.
-        var goal = {
-        x: cols - 1,
-        y: rows - 1
-        };
+        //We subtract 1 because the grid squares are numbered from 0
+        //so the last square is always one less than the total number of squares.
+        var goal = {x: horizontalSquares - 1, y: verticalSquares - 1};
+
+        // Creating a variable for the maze
+        var maze = [];
 
         // Creating a Function to generate a maze using the alghorithm. 
         // DFS stands for Depth-First Search
         function generateMazeDFS(){
-        // First I'm filling the maze completely with walls (1)
+        
+        // First I'm filling the maze completely with walls (1s)
         maze = []; // Start with an empty array to hold the maze
-        for(var y=0; y<rows; y++){ // Loops through each row
+        
+        //This line starts a loop that goes through each row of the maze
+        // var y=0 - start at the first row (top).
+        // y<verticalSquares - keep going until you reach the number of rows in the maze.
+        // y++ move down one row each time,
+        for(var y=0; y<verticalSquares; y++){ 
         maze[y]=[]; // Create a new array for this row
-        for(var x=0;x<cols;x++) // Loop through each column
+        
+        for(var x=0;x<horizontalSquares;x++) // Loop through each column
         maze[y][x]=1; // Fills this cell with 1 or walls
         }
 
@@ -113,7 +127,7 @@
             var ny=y+dirs[i][1]*2;
             
         // Check if new position is inside maze bounds and not yet carved
-        if(nx>=0 && nx<cols && ny>=0 && ny<rows && maze[ny][nx]===1){
+        if(nx>=0 && nx<horizontalSquares && ny>=0 && ny<verticalSquares && maze[ny][nx]===1){
             maze[y+dirs[i][1]][x+dirs[i][0]]=0; // Remove wall between
             carve(nx,ny); // Recursive call to carve next cell
                 }
@@ -122,15 +136,27 @@
 
         carve(0,0); // Start carving from top-left
         maze[0][0]=0; // Make sure that starting point is empty
-        maze[rows-1][cols-1]=0; // Make sure that the goal is empty
+        maze[verticalSquares-1][horizontalSquares-1]=0; // Make sure that the goal is empty
         }
 
-        /*// Generates a random bright-ish color using HSL
-        // This had some bugs that i didn't had the time to fix, but it looks fun.
-        // Everytime the player moves the colors of the walls changes randomly.
+        // Creating a variable to store random wall colours when it's revealed.
+        var wallColors = {}; 
+
+        // Generates a random bright color using HSL
         function randomColor() {
-        return "hsl(" + Math.floor(Math.random() * 360) + ", 70%, 50%)";
-        }*/
+        //Whenever you call randomColor(), it returns a new color.
+        //Math.random() Generates a random decimal number between 0 and 1 (0 and 1 are not included)
+        //Multiplies that decimal by 360
+        //Why 360?
+        // HSL (Hue, Saturation, Lightness) color uses Hue as a degree on a color wheel from 0° to 360°.
+        // 0° = red, 120° = green, 240° = blue, etc
+        // Combines the hue with saturation and lightness to make a full HSL color string.
+        // "80%" - how intense the color is (saturation).
+        // "50%" - how bright the color is (lightness).
+        // example "hsl(300, 80%, 50%)" is bright purple
+        // Math.floor Rounds the number down to the nearest whole number
+        return "hsl(" + Math.floor(Math.random() * 360) + ", 80%, 50%)";
+        }
 
         // Function to draw grid and player
         function draw() {
@@ -139,44 +165,84 @@
 
                 // Draw the grid
                 //creating a for-loop to go through each row to help draw the maze grid
-                for (var y = 0; y < rows; y++) {
-                    for (var x = 0; x < cols; x++) {
-                        /*ctx.fillStyle = maze[y][x] === 1 ? randomColor() : '#111';*/
-                        ctx.fillStyle = maze[y][x] === 1 ? '#3d1f5b' : '#111';
-                        ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                for (var y = 0; y < verticalSquares; y++) {
+                    for (var x = 0; x < horizontalSquares; x++) {
+                       
+                        if (maze[y][x] === 0) {
+                            ctx.fillStyle = '#111';   // path (black)
+                        }
+                        else if (maze[y][x] === 1) {
+                            ctx.fillStyle = '#111';   // hidden wall (black)
+                        }
+                         else if (maze[y][x] === 2) {
+                        ctx.fillStyle = wallColors[y + "-" + x]; // revealed wall - random color
+                        }
 
+                        ctx.fillRect(x * squareSize, y * squareSize, squareSize, squareSize);
                         ctx.strokeStyle = '#111';
-                        ctx.strokeRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                        ctx.strokeRect(x * squareSize, y * squareSize, squareSize, squareSize);
                     }
                 }
                 
                 // Coloring and filling the goal.
                 ctx.fillStyle = 'white';
-                ctx.fillRect(goal.x * tileSize, goal.y * tileSize, tileSize, tileSize);
+                ctx.fillRect(goal.x * squareSize, goal.y * squareSize, squareSize, squareSize);
 
                 // Draw the player
                 ctx.fillStyle = player.color;
-                // Here we're multiplying players position with the tilesize 
+                
+                // Here we're multiplying players position with the squareSize 
                 // to convert from tile units to pixels
-                // We use the same value (tileSize) for width and height
+                // We use the same value (squareSize) for width and height
                 // because each tile in the maze is a square
-                ctx.fillRect(player.x * tileSize, player.y * tileSize, tileSize, tileSize);
+                ctx.fillRect(player.x * squareSize, player.y * squareSize, squareSize, squareSize);
         }
 
-        var maze = [];
-        generateMazeDFS(); // fill maze with walls and paths
-        draw();            // now draw the first maze
+        
+        generateMazeDFS(); // fill maze with walls and paths and random colours to be revealed
+        draw();            
 
         // Function to move player
+        // horizontalMove is how many squares to move left or right.
+        // verticalMove is how many squares to move up or down.
         function movePlayer(horizontalMove, verticalMove) {
+            
+            // newCol is the new x-position after moving left/right.
+            // player.x is where the player is now on the grid (like column number).
+            // horizontalMove is how much you want to move left or right.
+            // example: “I’m at column 3, I want to move 1 to the right, new column is 4.”
             var newCol = player.x + horizontalMove;
+            
+            //newRow is the new y-position after moving up/down.
             var newRow = player.y + verticalMove;
 
-            // Keep player inside the grid
-            if (newCol >= 0 && newCol < cols && newRow >= 0 && newRow < rows && maze[newRow][newCol] === 0) {
+            // Keep player inside the maze
+            // newCol >= 0 → Makes sure the new horizontal position isn’t less than 0 (the far left of the grid).
+            // newCol < horizontalSquares → Makes sure the new horizontal position is inside the grid width.
+            // newRow >= 0 → Makes sure the new vertical position isn’t less than 0 (the top of the grid).
+            // newRow < verticalSquares → Makes sure the new vertical position is inside the grid height
+            // Combined with && → all conditions must be true for the code inside the if to run
+            if (newCol >= 0 && newCol < horizontalSquares && newRow >= 0 && newRow < verticalSquares) {
+            
+            // Check if the new position is a path (0)
+            // If it's a path - move normally
+            // maze is our map of the game. It tells us which spots are walls and which are paths.
+            if (maze[newRow][newCol] === 0) {
             player.x = newCol;
             player.y = newRow;
-            checkWin(); // check if the player won
+            checkWin();
+            }
+            
+            // If it's a wall (1) - reveal it (turn 1 into 2)
+            else if (maze[newRow][newCol] === 1) {
+            maze[newRow][newCol] = 2; // mark as revealed wall
+            
+            // Combines the row and column numbers into a string key.
+            // Example: if newRow = 3 and newCol = 5, the key becomes "3-5".'
+            // randomColor() This function returns a random color.
+            // It assigns a color specifically for this wall cell.
+            wallColors[newRow + "-" + newCol] = randomColor();
+            }
             }
 
             // Redraw everything
@@ -186,6 +252,7 @@
 
         // Check if player reaches goal
         function checkWin() {
+        
         // If player is in the same column, row as the goal.
         // Then we get the allert.
           if(player.x === goal.x && player.y === goal.y){
@@ -197,29 +264,35 @@
         }
 
         // Arrow keys 
-        window.addEventListener('keydown', function(e) {
-            switch (e.key) {
-                case "ArrowUp": movePlayer(0, -1); break;
-                case "ArrowDown": movePlayer(0, 1); break;
-                case "ArrowLeft": movePlayer(-1, 0); break;
-                case "ArrowRight": movePlayer(1, 0); break;
-            }
+        // Using keyup means you have to press the button and then release it to move the player.
+        // you can also use keydown for smoother movement.
+        // Listen for when a key is released (not pressed down).
+        //When a key is released, run this code. event contains info about which key was released.
+       document.addEventListener('keyup', function(event) {
+        //Check if the released key is the up arrow or w
+        if (event.key === "ArrowUp"|| event.key === "w") { 
+        //If it was the up arrow or w key, move the player up by 1 square.
+        //first number is the horizontal move, second number is the vertical move
+        movePlayer(0, -1); 
+        } else if (event.key === "ArrowDown"|| event.key === "s") {
+        movePlayer(0, 1);  
+        } else if (event.key === "ArrowLeft"|| event.key === "a") {
+        movePlayer(-1, 0); // we don't move the player horizontally so the Up and down movement stays 0. 
+        } else if (event.key === "ArrowRight"|| event.key === "d") {
+        movePlayer(1, 0);  
+        }
         });
 
-        //
+
+        //The "click" here tells the browser when to run the code. It means “when the user clicks this button”.
+        // It resets the players position and the maze and redraws it. 
         document.getElementById('resetBtn').addEventListener('click', function(){
         player.x=0; player.y=0;
         generateMazeDFS();
         draw();
         });
         
-        /*document.getElementById('restartBtn').addEventListener('click', function(){
-        player.x=0; player.y=0;
-        generateMazeDFS();
-        draw();
-        });*/
-
-        console.log("This was harder than I thought!");
+        console.log();
     </script>
 
 </body>
