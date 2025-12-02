@@ -32,6 +32,15 @@ For example:
 
   - *Removed one button because they both basically did the same thing. Experimented with colors but it didn't turn out like i wanted to*
   - *Added game title at the top*
+ 
+- 01-12-2025 08:00 Worked for 4 hours.
+
+  - *Made the walls the same color as the path. Now each time the player hits a wall, the wall gets a random color, that way you can find your path to reach the goal*
+  - *Changed some of the codes into smaller steps and easier to explain.*
+  - *The player now can move with both with the arrow keys and "w.a.s.d" keys to move*
+ 
+    
+
 
 
 
