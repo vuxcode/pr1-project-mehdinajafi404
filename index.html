@@ -52,17 +52,15 @@
 <!--Creating a container for the buttons so that I can customize later-->
   <div id="controls">
     <button id="resetBtn">Reset</button>
-    <!--<button id="restartBtn">Restart</button>-->
   </div>
 
     <script>
        
         // Creating variables for canvas
         var canvas = document.getElementById('MazeCanvas');
-        // The context or ctx is what gives us the ability to draw in 2d on the canvas.
+        // The context or ctx variable is what gives us the ability to draw in 2d on the canvas.
         var ctx = canvas.getContext('2d');
 
-        
         // Creating the tiles and it's size and amount.
         // The Canvas is 680 pixels wide, if we devide it by 40 it gives us 17 squares.
         // And the height would be 11 squares. 
@@ -72,7 +70,6 @@
         // Math.floor rounds a number down to the nearest whole number
         var horizontalSquares = Math.floor(canvas.width / squareSize); //17 squares horizontally
         var verticalSquares = Math.floor(canvas.height / squareSize); //11 squares vertically
-       
 
         // Creating the player
         // x is horizontal player position and y is vertical player position
@@ -87,9 +84,8 @@
         // Creating a variable for the maze
         var maze = [];
 
-        // Creating a Function to generate a maze using the alghorithm. 
-        // DFS stands for Depth-First Search
-        function generateMazeDFS(){
+        // Creating a Function to generate a maze using the alghorithm.
+        function mazeAlghorithm(){
         
         // First I'm filling the maze completely with walls (1s)
         maze = []; // Start with an empty array to hold the maze
@@ -99,52 +95,81 @@
         // y<verticalSquares - keep going until you reach the number of rows in the maze.
         // y++ move down one row each time,
         for(var y=0; y<verticalSquares; y++){ 
-        maze[y]=[]; // Create a new array for this row
+        maze[y]=[]; // For this row number y, create an empty array to hold that row’s cells
         
-        for(var x=0;x<horizontalSquares;x++) // Loop through each column
-        maze[y][x]=1; // Fills this cell with 1 or walls
+        for(var x=0; x<horizontalSquares; x++) // Loop through each column
+        maze[y][x]=1; // Set every cell in the grid to 1 so the whole maze starts filled with walls
         }
 
-        // This is the main Boss, the core alghorithm that actually creates a maze. 
-        // creating a function to carve paths. 
-        function carve(x,y){
-        maze[y][x]=0; // mark current cell as empty/path. 
+        // Here, I’m using recursion. In the code, recursion occurs when "carve()" calls itself with the coordinates of the next cell, 
+        // -allowing the algorithm to dig paths through the maze automatically—moving deeper in one direction and
+        //  -backtracking when it hits a dead end.    
+        // creating a function to carve paths. we're simply making the random maze alghorithn here.
+        // we're defining the function "carve" that digs paths starting from tile (x, y).
+        // c-columnn and c-row are parameters.They don’t have a value until you call carve(0, 0) (then x=0, y=0).
+        function carve(currentColumn,currentRow){
+        maze[currentRow][currentColumn]=0; // mark current cell as empty/path. 
+        
         // creating an array that stores all the possible directions- 
         // -the algorithm can move from the current cell.
-        // for example [1, 0] means go 1 cell right, 0 cells down. move right
-        // Possible directions to move: up, right, down, left
-        var dirs=[[0,-1],[1,0],[0,1],[-1,0]];
+        // for example [1, 0] means go 1 cell right, 0 cells down. move right.
+        // This line builds a list of the four possible ways to move in the grid (up, right, down, left).
+        var direction=[[0,-1],[1,0],[0,1],[-1,0]];
         
         // Shuffle directions to make maze random
-        for(var i=dirs.length-1;i>0;i--){
-            var j=Math.floor(Math.random()*(i+1));
-            [dirs[i],dirs[j]]=[dirs[j],dirs[i]];
+            // This loop walks backwards through the direction list to prepare it for shuffling
+            // currentIndex starts at the last item.
+            // Keep looping as long as currentIndex is bigger than 0
+            // Subtract 1 from currentIndex after every loop
+        for(var currentIndex=direction.length-1; currentIndex>0;currentIndex--){
+            // Pick a random index from the array to swap with.
+            var randomIndex=Math.floor(Math.random()*(currentIndex+1));
+            // Swap the direction at currentIndex with the direction at randomIndex
+            [direction[currentIndex],direction[randomIndex]] = [direction[randomIndex],direction[currentIndex]];
             }
-            
+        
+        // Here, Backtracking works with recursion: when the path can’t go forward, 
+        // -the function goes back to the previous cell and tries a new direction. 
+        // -This makes sure the maze stays connected and nothing gets stuck or left out.
         // Try moving in each direction
-        for(var i=0;i<dirs.length;i++){
-            var nx=x+dirs[i][0]*2; // Move 2 cells to skip a wall
-            var ny=y+dirs[i][1]*2;
             
-        // Check if new position is inside maze bounds and not yet carved
-        if(nx>=0 && nx<horizontalSquares && ny>=0 && ny<verticalSquares && maze[ny][nx]===1){
-            maze[y+dirs[i][1]][x+dirs[i][0]]=0; // Remove wall between
-            carve(nx,ny); // Recursive call to carve next cell
+        // Here Fisher–Yates Shuffle is used to randomize the order of possible directions, 
+        // -making each maze unpredictable instead of following the same repetitive pattern.
+        // Loop through each possible direction (up, right, down, left) one by one.
+        for(var currentIndex=0;currentIndex<direction.length;currentIndex++){
+            //Calculate the x-coordinate of the next cell we would move to in this direction.
+            // the algorithm moves two cells at a time, leaving a wall in between. 
+            // -this ensures that walls remain between paths, giving the maze its proper structure. 
+            // -without this, the maze would just be empty tiles with no walls separating paths.
+            var nextCellX=currentColumn+direction[currentIndex][0]*2; // Move 2 cells to skip a wall in between. 
+            // Calculate the y-coordinate...
+            var nextCellY=currentRow+direction[currentIndex][1]*2; 
+            
+        // Check if the next cell is inside the maze boundaries and hasn’t been carved yet.
+        if(nextCellX>=0 && nextCellX<horizontalSquares && nextCellY>=0 && nextCellY<verticalSquares && maze[nextCellY][nextCellX]===1){
+            // Carve the wall between the current cell (x, y) and the next cell (nextCellX, nextCellY) to connect the path.
+            maze[currentRow+direction[currentIndex][1]][currentColumn+direction[currentIndex][0]]=0; // Remove wall between
+            // Call the same carve function.
+            // Pass the coordinates of the next cell.
+            // Go to the next cell and repeat the carving process from there.
+            // This is how the maze digs paths deeply and automatically backtracks.
+            carve(nextCellX,nextCellY); // Recursive call to carve next cell
                 }
             }
         }   
 
-        carve(0,0); // Start carving from top-left
-        maze[0][0]=0; // Make sure that starting point is empty
-        maze[verticalSquares-1][horizontalSquares-1]=0; // Make sure that the goal is empty
+        carve(0,0); //Begin the maze generation at the top-left corner. The algorithm will start digging paths from here.
+        maze[0][0]=0; //Ensure the starting point is always open, even if the algorithm would have accidentally left it as a wall.
+        maze[verticalSquares-1][horizontalSquares-1]=0; //Guarantee the goal cell is open, so the maze is solvable.
         }
+        
 
         // Creating a variable to store random wall colours when it's revealed.
         var wallColors = {}; 
 
         // Generates a random bright color using HSL
         function randomColor() {
-        //Whenever you call randomColor(), it returns a new color.
+        //Whenever I call randomColor(), it returns a new color.
         //Math.random() Generates a random decimal number between 0 and 1 (0 and 1 are not included)
         //Multiplies that decimal by 360
         //Why 360?
@@ -161,37 +186,51 @@
         // Function to draw grid and player
         function draw() {
                 // Clear the canvas
+                // Before drawing anything, we erase the whole canvas. so we don't draw stuff on top of old drawings.
+                // ctx is my canvas’s drawing tool. Like a digital paintbrush.
+                // clearRect erases a rectangle.
+                // 0, 0 are the starting coordinates of the rectangle you want to erase.
+                // width and height is the size of the rectangle we want to clear.
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                 // Draw the grid
                 //creating a for-loop to go through each row to help draw the maze grid
-                for (var y = 0; y < verticalSquares; y++) {
-                    for (var x = 0; x < horizontalSquares; x++) {
-                       
-                        if (maze[y][x] === 0) {
-                            ctx.fillStyle = '#111';   // path (black)
+                // Start at the first row, Keep going until you've reached the last row, Move down one row every time.
+                for (var columnIndex = 0; columnIndex < verticalSquares; columnIndex++) {
+                    //Start at the first column, Move across the row until you reach the last column, Shift one step right each time.
+                    for (var rowIndex = 0; rowIndex < horizontalSquares; rowIndex++) {
+                       //If this square is a path, paint it black.
+                       // maze y,x means if the square inside the maze at row y and column x is exaclty 0 paint it black.
+                        if (maze[columnIndex][rowIndex] === 0) {
+                            ctx.fillStyle = '#111';  
                         }
-                        else if (maze[y][x] === 1) {
-                            ctx.fillStyle = '#111';   // hidden wall (black)
+                        //If it’s a hidden wall, also paint it dark.
+                        else if (maze[columnIndex][rowIndex] === 1) {
+                            ctx.fillStyle = '#222';   // hidden wall (black)
                         }
-                         else if (maze[y][x] === 2) {
-                        ctx.fillStyle = wallColors[y + "-" + x]; // revealed wall - random color
+                        //If it’s a revealed wall, use its saved random color.
+                         else if (maze[columnIndex][rowIndex] === 2) {
+                        ctx.fillStyle = wallColors[columnIndex + "-" + rowIndex];
                         }
-
-                        ctx.fillRect(x * squareSize, y * squareSize, squareSize, squareSize);
+                        // x * squareSize - Convert tile X into pixel X
+                        // the last two squareSize are for the square width and height.
+                        // So this draws a perfect square.
+                        ctx.fillRect(rowIndex * squareSize, columnIndex * squareSize, squareSize, squareSize);
+                        //The border color for the square.
                         ctx.strokeStyle = '#111';
-                        ctx.strokeRect(x * squareSize, y * squareSize, squareSize, squareSize);
+                        //draws the border around the square.
+                        ctx.strokeRect(rowIndex * squareSize, columnIndex * squareSize, squareSize, squareSize);
                     }
                 }
                 
-                // Coloring and filling the goal.
+                // Coloring and drawing the goal.
                 ctx.fillStyle = 'white';
                 ctx.fillRect(goal.x * squareSize, goal.y * squareSize, squareSize, squareSize);
 
                 // Draw the player
                 ctx.fillStyle = player.color;
                 
-                // Here we're multiplying players position with the squareSize 
+                // Here we're doing the same multiplying players position with the squareSize 
                 // to convert from tile units to pixels
                 // We use the same value (squareSize) for width and height
                 // because each tile in the maze is a square
@@ -199,8 +238,8 @@
         }
 
         
-        generateMazeDFS(); // fill maze with walls and paths and random colours to be revealed
-        draw();            
+        mazeAlghorithm(); // fill maze with walls and paths and random colours to be revealed
+        draw(); // Now that the maze exists, draw it on the screen.
 
         // Function to move player
         // horizontalMove is how many squares to move left or right.
@@ -240,7 +279,7 @@
             // Combines the row and column numbers into a string key.
             // Example: if newRow = 3 and newCol = 5, the key becomes "3-5".'
             // randomColor() This function returns a random color.
-            // It assigns a color specifically for this wall cell.
+            // It assigns a color specifically for this wall square.
             wallColors[newRow + "-" + newCol] = randomColor();
             }
             }
@@ -258,7 +297,7 @@
           if(player.x === goal.x && player.y === goal.y){
         alert("🎉 You made it! Press OK for a new random maze.");
         player.x = 0; player.y = 0;
-        generateMazeDFS();
+        mazeAlghorithm();
         draw();
         }
         }
@@ -288,7 +327,7 @@
         // It resets the players position and the maze and redraws it. 
         document.getElementById('resetBtn').addEventListener('click', function(){
         player.x=0; player.y=0;
-        generateMazeDFS();
+        mazeAlghorithm();
         draw();
         });
         
